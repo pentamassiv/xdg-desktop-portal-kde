@@ -115,11 +115,6 @@ uint RemoteDesktopPortal::CreateSession(const QDBusObjectPath &handle,
         return 2;
     }
 
-    if (!WaylandIntegration::isStreamingAvailable()) {
-        qCWarning(XdgDesktopPortalKdeRemoteDesktop) << "zkde_screencast_unstable_v1 does not seem to be available";
-        return 2;
-    }
-
     connect(session, &Session::closed, [session] {
         auto remoteDesktopSession = qobject_cast<RemoteDesktopSession *>(session);
         const auto streams = remoteDesktopSession->streams();
@@ -238,6 +233,10 @@ uint RemoteDesktopPortal::Start(const QDBusObjectPath &handle,
     }
 
     if (session->screenSharingEnabled()) {
+        if (!WaylandIntegration::isStreamingAvailable()) {
+            qCWarning(XdgDesktopPortalKdeRemoteDesktop) << "zkde_screencast_unstable_v1 does not seem to be available";
+            return 2;
+        }
         WaylandIntegration::Streams streams;
         const auto screens = qGuiApp->screens();
         if (session->multipleSources() || screens.count() == 1) {
